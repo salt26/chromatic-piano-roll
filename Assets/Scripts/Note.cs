@@ -51,7 +51,7 @@ public class Note : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public void UpdateNote()
     {
         if (id >= 0)
         {
