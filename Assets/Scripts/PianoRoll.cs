@@ -19,10 +19,13 @@ public class PianoRoll : MonoBehaviour
     public Slider scrollSlider;
     public Slider scaleSlider;
 
-    private List<Note> notes = new();
-    private long endTiming;
+    [HideInInspector]
+    public List<Note> notes = new();
+
+    public long EndTiming { get; private set; }
 
     private float _xScale = 500000f;
+
     public float XScale
     {
         get
@@ -49,7 +52,7 @@ public class PianoRoll : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        endTiming = 0;
+        EndTiming = 0;
         JArray jArray = JArray.Parse(notesJson.text);
         foreach (JObject noteJson in jArray)
         {
@@ -57,19 +60,19 @@ public class PianoRoll : MonoBehaviour
             Note note = g.GetComponent<Note>();
             note.Initialize(noteJson);
             notes.Add(note);
-            endTiming = Math.Max(endTiming, note.endTiming);
+            EndTiming = Math.Max(EndTiming, note.endTiming);
         }
-
+        scaleSlider.value = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
     }
 
     void Update()
     {
-        mainCamera.transform.localPosition = new Vector3(Mathf.Lerp(8.5f, endTiming / XScale - 8.5f, scrollSlider.value), 0f, -10f);
+        mainCamera.transform.localPosition = new Vector3(Mathf.Lerp(8.5f, EndTiming / XScale - 8.5f, scrollSlider.value), 0f, -10f);
     }
 
     public void UpdateXScale()
     {
-        XScale = Mathf.Lerp(100000f, Math.Max(100000f, endTiming / 17f), scaleSlider.value);
+        XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / 17f), scaleSlider.value);
         foreach (Note note in notes)
         {
             note.UpdateNote();

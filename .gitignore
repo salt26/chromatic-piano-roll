@@ -1,5 +1,7 @@
 Assets/Data/MIDI/*
 Assets/Data/JSON/*
+*.sf2
+*.sf2.meta
 
 
 # This .gitignore file should be placed at the root of your Unity project directory

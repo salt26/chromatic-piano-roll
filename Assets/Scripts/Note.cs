@@ -63,6 +63,11 @@ public class Note : MonoBehaviour
         }
     }
 
+    public void PlayNote()
+    {
+
+    }
+
     public static Pitch StringToPitch(string pitchClass)
     {
         return (Pitch)Enum.Parse(typeof(Pitch), SharpToFlat(pitchClass));
