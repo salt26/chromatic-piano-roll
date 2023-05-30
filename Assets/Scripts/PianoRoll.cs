@@ -64,7 +64,7 @@ public class PianoRoll : MonoBehaviour
             notes.Add(note);
             EndTiming = Math.Max(EndTiming, note.endTiming);
         }
-        scaleValue = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
+        rangeSlider.MinRangeSize = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
     }
 
     void Update()

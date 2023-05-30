@@ -133,7 +133,7 @@ public class PlayMusic : MonoBehaviour
         {
             PianoRoll.pr.mainCamera.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale + 4.5f, 0f, -10f);
             PianoRoll.pr.scrollSlider.interactable = false;
-            PianoRoll.pr.scrollSlider.value = Mathf.Clamp01(playbackPosition / (PianoRoll.pr.EndTiming - 9f * PianoRoll.pr.XScale));
+            PianoRoll.pr.scrollValue = Mathf.Clamp01(playbackPosition / (PianoRoll.pr.EndTiming - 9f * PianoRoll.pr.XScale));
         }
         else
         {
