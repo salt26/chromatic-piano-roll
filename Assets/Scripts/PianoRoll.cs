@@ -38,8 +38,10 @@ public class PianoRoll : MonoBehaviour
         }
     }
 
-    private float scaleValue;
-    private float scrollValue;
+    [HideInInspector]
+    public float scaleValue;
+    [HideInInspector]
+    public float scrollValue;
 
     void Awake()
     {
@@ -65,10 +67,14 @@ public class PianoRoll : MonoBehaviour
             EndTiming = Math.Max(EndTiming, note.endTiming);
         }
         rangeSlider.MinRangeSize = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
+        scaleValue = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
+        rangeSlider.LowValue = 0;
+        rangeSlider.HighValue = scaleValue;
     }
 
     void Update()
     {
+        scrollValue = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
         mainCamera.transform.localPosition = new Vector3(Mathf.Lerp(4.5f, EndTiming / XScale - 4.5f, scrollValue), 0f, -10f);
     }
 
@@ -80,5 +86,32 @@ public class PianoRoll : MonoBehaviour
         {
             note.UpdateNote();
         }
+    }
+
+    public void UpdateRangeSliderValues(float lowValue, float highValue, float scaleValue)
+    {
+        if (lowValue < rangeSlider.MinValue && highValue <= rangeSlider.MaxValue)
+        {
+            lowValue = rangeSlider.MinValue;
+            highValue = scaleValue;
+            this.scrollValue = (lowValue + highValue) / 2f;
+            this.scaleValue = scaleValue;
+        }
+        else if (highValue > rangeSlider.MaxValue && lowValue >= rangeSlider.MinValue)
+        {
+            highValue = rangeSlider.MaxValue;
+            lowValue = rangeSlider.MaxValue - scaleValue;
+            this.scrollValue = (lowValue + highValue) / 2f;
+            this.scaleValue = scaleValue;
+        }
+        else if (lowValue < rangeSlider.MinValue && highValue > rangeSlider.MaxValue)
+        {
+            lowValue = rangeSlider.MinValue;
+            highValue = rangeSlider.MaxValue;
+            this.scrollValue = 0.5f;
+            this.scaleValue = 1f;
+        }
+        rangeSlider.LowValue = lowValue;
+        rangeSlider.HighValue = highValue;
     }
 }

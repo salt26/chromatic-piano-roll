@@ -132,12 +132,15 @@ public class PlayMusic : MonoBehaviour
         if (HasCameraLocked)
         {
             PianoRoll.pr.mainCamera.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale + 4.5f, 0f, -10f);
-            PianoRoll.pr.scrollSlider.interactable = false;
-            PianoRoll.pr.scrollValue = Mathf.Clamp01(playbackPosition / (PianoRoll.pr.EndTiming - 9f * PianoRoll.pr.XScale));
+            //PianoRoll.pr.scrollSlider.interactable = false;
+
+            float lowValue = PianoRoll.pr.scrollValue - PianoRoll.pr.scaleValue / 2f;
+            float highValue = PianoRoll.pr.scrollValue + PianoRoll.pr.scaleValue / 2f;
+            PianoRoll.pr.UpdateRangeSliderValues(lowValue, highValue, Mathf.Clamp01(playbackPosition / (PianoRoll.pr.EndTiming - 9f * PianoRoll.pr.XScale)));
         }
         else
         {
-            PianoRoll.pr.scrollSlider.interactable = true;
+            //PianoRoll.pr.scrollSlider.interactable = true;
         }
 
         int death = 0;
