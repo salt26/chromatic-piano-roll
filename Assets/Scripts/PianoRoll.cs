@@ -4,6 +4,7 @@ using UnityEngine;
 using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine.UI;
+using UnityEngine.UI.Extensions;
 using Sanford.Multimedia.Midi;
 
 public class PianoRoll : MonoBehaviour
@@ -11,13 +12,11 @@ public class PianoRoll : MonoBehaviour
     public static PianoRoll pr;
 
     public TextAsset notesJson;
-    public AudioClip audioClip;
     public GameObject notePrefab;
     public GameObject notesParent;
     public int colorPaletteIndex;
     public Camera mainCamera;
-    public Slider scrollSlider;
-    public Slider scaleSlider;
+    public RangeSlider rangeSlider;
 
     [HideInInspector]
     public List<Note> notes = new();
@@ -38,6 +37,9 @@ public class PianoRoll : MonoBehaviour
             else _xScale = value;
         }
     }
+
+    private float scaleValue;
+    private float scrollValue;
 
     void Awake()
     {
@@ -62,17 +64,18 @@ public class PianoRoll : MonoBehaviour
             notes.Add(note);
             EndTiming = Math.Max(EndTiming, note.endTiming);
         }
-        scaleSlider.value = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
+        scaleValue = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
     }
 
     void Update()
     {
-        mainCamera.transform.localPosition = new Vector3(Mathf.Lerp(4.5f, EndTiming / XScale - 4.5f, scrollSlider.value), 0f, -10f);
+        mainCamera.transform.localPosition = new Vector3(Mathf.Lerp(4.5f, EndTiming / XScale - 4.5f, scrollValue), 0f, -10f);
     }
 
     public void UpdateXScale()
     {
-        XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / 17f), scaleSlider.value);
+        scaleValue = rangeSlider.HighValue - rangeSlider.LowValue;
+        XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / 17f), scaleValue);
         foreach (Note note in notes)
         {
             note.UpdateNote();

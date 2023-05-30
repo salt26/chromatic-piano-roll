@@ -1899,7 +1899,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   notesJson: {fileID: 4900000, guid: 46941124ce877854b8209ffdecb5ceee, type: 3}
-  audioClip: {fileID: 0}
   notePrefab: {fileID: 3896810369488186565, guid: 0a046ee6ef47ecd4e832a264c713ae58,
     type: 3}
   notesParent: {fileID: 992873061}
