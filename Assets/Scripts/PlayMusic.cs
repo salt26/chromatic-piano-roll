@@ -131,9 +131,9 @@ public class PlayMusic : MonoBehaviour
 
         if (HasCameraLocked)
         {
-            PianoRoll.pr.mainCamera.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale + 8.5f, 0f, -10f);
+            PianoRoll.pr.mainCamera.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale + 4.5f, 0f, -10f);
             PianoRoll.pr.scrollSlider.interactable = false;
-            PianoRoll.pr.scrollSlider.value = Mathf.Clamp01(playbackPosition / (PianoRoll.pr.EndTiming - 17f * PianoRoll.pr.XScale));
+            PianoRoll.pr.scrollSlider.value = Mathf.Clamp01(playbackPosition / (PianoRoll.pr.EndTiming - 9f * PianoRoll.pr.XScale));
         }
         else
         {
@@ -144,13 +144,14 @@ public class PlayMusic : MonoBehaviour
         int num = offsetBuffer.Count;
         foreach (NoteOffset offset in offsetBuffer.Where(x => x.endTiming < playbackPosition))
         {
+            offset.note.HighlightOff();
             try
             {
                 syn.NoteOff(offset.channel, offset.notePosition);
             }
             catch (FluidSynthInteropException e)
             {
-                Debug.LogWarning(e.StackTrace);
+                Debug.Log(e);
             }
             death++;
         }
@@ -160,13 +161,14 @@ public class PlayMusic : MonoBehaviour
         {
             foreach (Note note in PianoRoll.pr.notes.Where(x => x.startTiming >= oldPosition && x.startTiming < playbackPosition))
             {
+                note.HighlightOn();
                 try
                 {
                     syn.NoteOn(note.channel, note.notePosition, note.noteVelocity);
                 }
                 catch (FluidSynthInteropException e)
                 {
-                    Debug.LogWarning(e.StackTrace);
+                    Debug.Log(e);
                 }
                 offsetBuffer.Add(new NoteOffset(note.id, note.channel, note.notePosition, note.endTiming, note));
             }
@@ -216,13 +218,14 @@ public class PlayMusic : MonoBehaviour
             HasCameraLocked = false;
             foreach (NoteOffset offset in offsetBuffer)
             {
+                offset.note.HighlightOff();
                 try
                 {
                     syn.NoteOff(offset.channel, offset.notePosition);
                 }
                 catch (FluidSynthInteropException e)
                 {
-                    Debug.LogWarning(e.StackTrace);
+                    Debug.Log(e);
                 }
             }
             offsetBuffer.Clear();
@@ -239,13 +242,14 @@ public class PlayMusic : MonoBehaviour
             playbackBar.transform.localPosition = new Vector3(0f, 0f, 0f);
             foreach (NoteOffset offset in offsetBuffer)
             {
+                offset.note.HighlightOff();
                 try
                 {
                     syn.NoteOff(offset.channel, offset.notePosition);
                 }
                 catch (FluidSynthInteropException e)
                 {
-                    Debug.LogWarning(e.StackTrace);
+                    Debug.Log(e);
                 }
             }
             offsetBuffer.Clear();

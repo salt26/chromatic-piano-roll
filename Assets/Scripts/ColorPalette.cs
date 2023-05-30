@@ -8,6 +8,8 @@ public class ColorPalette : MonoBehaviour
 {
     public List<ColorCodeDictionary> colorPalettes;
 
+	public Color colorForNoteHighlight;
+
 	// ["#77D977", "#A877D9", "#D9D977", "#77A8D9", "#D97777", "#77D9A8", "#D977D9", "#A8D977", "#7777D9", "#D9A877", "#77D9D9", "#D977A8"]
 
 	public static Color ChangeAlpha(Color original, float alpha)

@@ -1044,7 +1044,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.5, y: 0, z: -10}
+  m_LocalPosition: {x: 4.5, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1971,6 +1971,7 @@ MonoBehaviour:
       _value: {r: 0.46666667, g: 0.8509804, b: 0.8509804, a: 1}
     - _key: 5
       _value: {r: 0.46666667, g: 0.8509804, b: 0.65882355, a: 1}
+  colorForNoteHighlight: {r: 0, g: 0, b: 0, a: 1}
 --- !u!4 &1528920799
 Transform:
   m_ObjectHideFlags: 0

@@ -67,7 +67,7 @@ public class PianoRoll : MonoBehaviour
 
     void Update()
     {
-        mainCamera.transform.localPosition = new Vector3(Mathf.Lerp(8.5f, EndTiming / XScale - 8.5f, scrollSlider.value), 0f, -10f);
+        mainCamera.transform.localPosition = new Vector3(Mathf.Lerp(4.5f, EndTiming / XScale - 4.5f, scrollSlider.value), 0f, -10f);
     }
 
     public void UpdateXScale()

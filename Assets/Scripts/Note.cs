@@ -24,6 +24,8 @@ public class Note : MonoBehaviour
     public int endNoteIndex;
     public int noteDurationUnits;
 
+    public GameObject highlightObject;
+
     public void Initialize(JObject note)
     {
         id = (int)note["ID"];
@@ -47,6 +49,7 @@ public class Note : MonoBehaviour
         GetComponent<SpriteRenderer>().color = ColorPalette.ChangeAlpha(PianoRoll.pr.GetComponent<ColorPalette>().colorPalettes[PianoRoll.pr.colorPaletteIndex][notePitchClass],
             1f/*noteVelocity / 127f*/);
         GetComponent<SpriteRenderer>().size = new Vector3((endTiming - startTiming) / PianoRoll.pr.XScale, 0.2f, 1f);
+        HighlightOff();
         gameObject.SetActive(true);
     }
 
@@ -63,9 +66,18 @@ public class Note : MonoBehaviour
         }
     }
 
-    public void PlayNote()
+    public void HighlightOn()
     {
+        float sizeWidth = GetComponent<SpriteRenderer>().size.x;
+        highlightObject.transform.localScale = new Vector3(1 + (0.03f / sizeWidth), 1.3f, 1f);
+        highlightObject.GetComponent<SpriteRenderer>().size = new Vector3(sizeWidth, 0.2f, 1f);
+        highlightObject.GetComponent<SpriteRenderer>().color = PianoRoll.pr.GetComponent<ColorPalette>().colorForNoteHighlight;
+        highlightObject.SetActive(true);
+    }
 
+    public void HighlightOff()
+    {
+        highlightObject.SetActive(false);
     }
 
     public static Pitch StringToPitch(string pitchClass)
