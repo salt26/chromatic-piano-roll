@@ -120,6 +120,7 @@ public class PlayMusic : MonoBehaviour
             playButton.interactable = false;
             pauseButton.interactable = true;
             pauseButton.gameObject.SetActive(true);
+            PianoRoll.pr.rangeSlider.PointerUpOnly = false;
         }
         else
         {
@@ -127,20 +128,22 @@ public class PlayMusic : MonoBehaviour
             pauseButton.interactable = false;
             playButton.interactable = true;
             playButton.gameObject.SetActive(true);
+            PianoRoll.pr.rangeSlider.PointerUpOnly = true;
         }
 
         if (HasCameraLocked)
         {
-            PianoRoll.pr.mainCamera.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale + 4.5f, 0f, -10f);
-            //PianoRoll.pr.scrollSlider.interactable = false;
+            PianoRoll.pr.scrollValue = (playbackPosition + PianoRoll.MIN_OFFSET * PianoRoll.pr.XScale) / PianoRoll.pr.EndTiming;
+            PianoRoll.pr.mainCamera.transform.localPosition = new Vector3(PianoRoll.pr.EndTiming / PianoRoll.pr.XScale * PianoRoll.pr.scrollValue, 0f, -10f);
 
             float lowValue = PianoRoll.pr.scrollValue - PianoRoll.pr.scaleValue / 2f;
             float highValue = PianoRoll.pr.scrollValue + PianoRoll.pr.scaleValue / 2f;
-            PianoRoll.pr.UpdateRangeSliderValues(lowValue, highValue, Mathf.Clamp01(playbackPosition / (PianoRoll.pr.EndTiming - 9f * PianoRoll.pr.XScale)));
+            PianoRoll.pr.UpdateRangeSliderValues(lowValue, highValue, PianoRoll.pr.scaleValue);
+            PianoRoll.pr.rangeSlider.IsBarMovable = false;
         }
         else
         {
-            //PianoRoll.pr.scrollSlider.interactable = true;
+            PianoRoll.pr.rangeSlider.IsBarMovable = true;
         }
 
         int death = 0;

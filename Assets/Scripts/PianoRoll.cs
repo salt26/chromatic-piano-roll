@@ -38,10 +38,15 @@ public class PianoRoll : MonoBehaviour
         }
     }
 
+    public const float MAX_OFFSET = 8.5f;
+    public const float MIN_OFFSET = 4.5f;
+
     [HideInInspector]
     public float scaleValue;
     [HideInInspector]
     public float scrollValue;
+    [HideInInspector]
+    public float scrollOffset;
 
     void Awake()
     {
@@ -66,22 +71,27 @@ public class PianoRoll : MonoBehaviour
             notes.Add(note);
             EndTiming = Math.Max(EndTiming, note.endTiming);
         }
-        rangeSlider.MinRangeSize = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
-        scaleValue = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / 17 - 100000f));
+        rangeSlider.MinRangeSize = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / (MAX_OFFSET * 2f) - 100000f));
+        scaleValue = rangeSlider.MinRangeSize;
         rangeSlider.LowValue = 0;
         rangeSlider.HighValue = scaleValue;
     }
 
     void Update()
     {
-        scrollValue = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
-        mainCamera.transform.localPosition = new Vector3(Mathf.Lerp(4.5f, EndTiming / XScale - 4.5f, scrollValue), 0f, -10f);
+        //float onset = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
+        //scrollValue = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
+        //float offset = (rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f;
+        //scrollValue = (((rangeSlider.MinRangeSize + rangeSlider.LowValue) / rangeSlider.MinRangeSize * 4f + 4.5f) + ((rangeSlider.HighValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f)) / 2f;
+        scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
+        mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
     }
 
     public void UpdateXScale()
     {
         scaleValue = rangeSlider.HighValue - rangeSlider.LowValue;
-        XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / 17f), scaleValue);
+        scrollOffset = Mathf.Lerp(MIN_OFFSET, MAX_OFFSET, Mathf.Pow(Mathf.Clamp01(rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize), 0.5f));
+        XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / (scrollOffset * 2f)), scaleValue);
         foreach (Note note in notes)
         {
             note.UpdateNote();

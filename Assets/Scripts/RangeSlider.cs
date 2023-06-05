@@ -147,6 +147,36 @@ namespace UnityEngine.UI.Extensions
             }
         }
 
+        [SerializeField]
+        private bool m_PointerUpOnly;
+
+        public bool PointerUpOnly
+        {
+            get
+            {
+                return m_PointerUpOnly;
+            }
+            set
+            {
+                m_PointerUpOnly = value;
+            }
+        }
+
+        [SerializeField]
+        private bool m_IsBarMovable;
+
+        public bool IsBarMovable
+        {
+            get
+            {
+                return m_IsBarMovable;
+            }
+            set
+            {
+                m_IsBarMovable = value;
+            }
+        }
+
         /// <summary>
         /// Set the value of the slider without invoking onValueChanged callback.
         /// </summary>
@@ -542,9 +572,18 @@ namespace UnityEngine.UI.Extensions
                         delta = 1 - NormalizedHighValue;
                     }
 
+                    float oldDiff = NormalizedHighValue - NormalizedLowValue;
+
                     //adjust both ends
                     NormalizedLowValue += delta;
                     NormalizedHighValue += delta;
+
+                    float newDiff = NormalizedHighValue - NormalizedLowValue;
+                    //check for changes in size before and after dragging
+                    if (!Mathf.Approximately(oldDiff, newDiff))
+                    {
+                        NormalizedLowValue = NormalizedHighValue - oldDiff;
+                    }
                 }
             }
         }
@@ -591,8 +630,12 @@ namespace UnityEngine.UI.Extensions
             }
             else
             {
+                if (!IsBarMovable) return;
                 //outside the handles, move the entire slider along
-                UpdateDrag(eventData, eventData.pressEventCamera);
+                if (PointerUpOnly)
+                {
+                    UpdateDrag(eventData, eventData.pressEventCamera);
+                }
                 interactionState = InteractionState.Bar;
                 if (transition == Transition.ColorTint)
                 {
@@ -608,11 +651,18 @@ namespace UnityEngine.UI.Extensions
             {
                 return;
             }
-            UpdateDrag(eventData, eventData.pressEventCamera);
+            if (PointerUpOnly)
+            {
+                UpdateDrag(eventData, eventData.pressEventCamera);
+            }
         }
 
         public override void OnPointerUp(PointerEventData eventData)
         {
+            if (!PointerUpOnly)
+            {
+                UpdateDrag(eventData, eventData.pressEventCamera);
+            }
             base.OnPointerUp(eventData);
             interactionState = InteractionState.None;
         }

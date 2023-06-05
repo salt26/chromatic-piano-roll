@@ -1481,6 +1481,7 @@ MonoBehaviour:
   m_LowValue: 0
   m_HighValue: 0
   m_MinRangeSize: 0
+  m_IsBarMovable: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
