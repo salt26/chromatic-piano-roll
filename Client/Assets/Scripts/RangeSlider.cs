@@ -74,7 +74,7 @@ namespace UnityEngine.UI.Extensions
         {
             get
             {
-                if (Mathf.Approximately(MinValue, MaxValue))
+                if (Approximately(MinValue, MaxValue))
                 {
                     return 0;
                 }
@@ -110,7 +110,7 @@ namespace UnityEngine.UI.Extensions
         {
             get
             {
-                if (Mathf.Approximately(MinValue, MaxValue))
+                if (Approximately(MinValue, MaxValue))
                 {
                     return 0;
                 }
@@ -436,6 +436,69 @@ namespace UnityEngine.UI.Extensions
             }
         }
 
+        void SetBoth(float low, float high)
+        {
+            SetBoth(low, high, true);
+        }
+
+        protected virtual void SetBoth(float low, float high, bool sendCallback)
+        {
+            if (HighValue - MinRangeSize < MinValue)
+            {
+                SetHigh(MinValue + MinRangeSize, false);
+            }
+
+            // Clamp the input
+            float newLowValue = Mathf.Clamp(low, MinValue, HighValue - MinRangeSize); //clamp between min and High
+            float newHighValue = Mathf.Clamp(high, LowValue + MinRangeSize, MaxValue); //clamp between min and High
+            if (WholeNumbers)
+            {
+                newLowValue = Mathf.Round(newLowValue);
+                newHighValue = Mathf.Round(newHighValue);
+            }
+
+            bool hasLowChanged = false;
+            bool hasHighChanged = false;
+
+            // If the stepped value doesn't match the last one, it's time to update
+            if (m_LowValue != newLowValue)
+            {
+                m_LowValue = newLowValue;
+                hasLowChanged = true;
+            }
+
+            // If the stepped value doesn't match the last one, it's time to update
+            if (m_HighValue != newHighValue)
+            {
+                m_HighValue = newHighValue;
+                hasHighChanged = true;
+            }
+
+            if (hasLowChanged || hasHighChanged)
+            {
+                UpdateVisuals();
+                if (sendCallback)
+                {
+                    if (hasLowChanged && hasHighChanged)
+                    {
+                        UISystemProfilerApi.AddMarker("RangeSlider.lowValue", this);
+                        UISystemProfilerApi.AddMarker("RangeSlider.highValue", this);
+                        m_OnValueChanged.Invoke(newLowValue, newHighValue);
+                    }
+                    else if (hasLowChanged)
+                    {
+                        UISystemProfilerApi.AddMarker("RangeSlider.lowValue", this);
+                        m_OnValueChanged.Invoke(newLowValue, HighValue);
+                    }
+                    else
+                    {
+                        UISystemProfilerApi.AddMarker("RangeSlider.highValue", this);
+                        m_OnValueChanged.Invoke(LowValue, newHighValue);
+                    }
+                }
+            }
+        }
+
 
         protected override void OnRectTransformDimensionsChange()
         {
@@ -575,15 +638,16 @@ namespace UnityEngine.UI.Extensions
                     float oldDiff = NormalizedHighValue - NormalizedLowValue;
 
                     //adjust both ends
-                    NormalizedLowValue += delta;
-                    NormalizedHighValue += delta;
+                    float normalizedLowValue = NormalizedLowValue + delta;
+                    float normalizedHighValue = NormalizedHighValue + delta;
 
-                    float newDiff = NormalizedHighValue - NormalizedLowValue;
+                    float newDiff = normalizedHighValue - normalizedLowValue;
                     //check for changes in size before and after dragging
-                    if (!Mathf.Approximately(oldDiff, newDiff))
+                    if (!Approximately(oldDiff, newDiff))
                     {
-                        NormalizedLowValue = NormalizedHighValue - oldDiff;
+                        normalizedLowValue = normalizedHighValue - oldDiff;
                     }
+                    SetBoth(Mathf.Lerp(MinValue, MaxValue, normalizedLowValue), Mathf.Lerp(MinValue, MaxValue, normalizedHighValue));
                 }
             }
         }
@@ -675,6 +739,11 @@ namespace UnityEngine.UI.Extensions
         public virtual void OnInitializePotentialDrag(PointerEventData eventData)
         {
             eventData.useDragThreshold = false;
+        }
+
+        protected static bool Approximately(float a, float b)
+        {
+            return Mathf.Abs(b - a) < Mathf.Max(1E-12f * Mathf.Max(Mathf.Abs(a), Mathf.Abs(b)), Mathf.Epsilon * 8f);
         }
     }
 }

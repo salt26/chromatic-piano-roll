@@ -115,7 +115,6 @@ public class PlayMusic : MonoBehaviour
         if (IsPlaying && playbackPosition <= PianoRoll.pr.EndTiming)
         {
             playbackPosition += (long)(Time.deltaTime * 1000000f);
-            playbackBar.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale, 0f, 0f);
             playButton.gameObject.SetActive(false);
             playButton.interactable = false;
             pauseButton.interactable = true;
@@ -130,6 +129,7 @@ public class PlayMusic : MonoBehaviour
             playButton.gameObject.SetActive(true);
             PianoRoll.pr.rangeSlider.PointerUpOnly = true;
         }
+        playbackBar.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale, 0f, 0f);
 
         if (HasCameraLocked)
         {

@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
-using Sanford.Multimedia.Midi;
 
 public class PianoRoll : MonoBehaviour
 {
@@ -23,6 +22,7 @@ public class PianoRoll : MonoBehaviour
 
     public long EndTiming { get; private set; }
 
+    [SerializeField]
     private float _xScale = 500000f;
 
     public float XScale
@@ -71,10 +71,13 @@ public class PianoRoll : MonoBehaviour
             notes.Add(note);
             EndTiming = Math.Max(EndTiming, note.endTiming);
         }
-        rangeSlider.MinRangeSize = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / (MAX_OFFSET * 2f) - 100000f));
+        rangeSlider.MinRangeSize = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / (MIN_OFFSET * 2f) - 100000f));
         scaleValue = rangeSlider.MinRangeSize;
         rangeSlider.LowValue = 0;
         rangeSlider.HighValue = scaleValue;
+        scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
+        mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
+        UpdateXScale();
     }
 
     void Update()
@@ -89,6 +92,7 @@ public class PianoRoll : MonoBehaviour
 
     public void UpdateXScale()
     {
+        print("UpdateXScale");
         scaleValue = rangeSlider.HighValue - rangeSlider.LowValue;
         scrollOffset = Mathf.Lerp(MIN_OFFSET, MAX_OFFSET, Mathf.Pow(Mathf.Clamp01(rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize), 0.5f));
         XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / (scrollOffset * 2f)), scaleValue);
@@ -100,6 +104,11 @@ public class PianoRoll : MonoBehaviour
 
     public void UpdateRangeSliderValues(float lowValue, float highValue, float scaleValue)
     {
+        if (lowValue > highValue)
+        {
+            (highValue, lowValue) = (lowValue, highValue);
+        }
+
         if (lowValue < rangeSlider.MinValue && highValue <= rangeSlider.MaxValue)
         {
             lowValue = rangeSlider.MinValue;
@@ -121,7 +130,9 @@ public class PianoRoll : MonoBehaviour
             this.scrollValue = 0.5f;
             this.scaleValue = 1f;
         }
-        rangeSlider.LowValue = lowValue;
-        rangeSlider.HighValue = highValue;
+        rangeSlider.SetValueWithoutNotify(lowValue, highValue);
+        this.scrollValue = (lowValue + highValue) / 2f;
+        this.scaleValue = highValue - lowValue;
+        rangeSlider.OnValueChanged.Invoke(lowValue, highValue);
     }
 }
