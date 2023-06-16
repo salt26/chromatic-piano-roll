@@ -76,7 +76,7 @@ public class PlayMusic : MonoBehaviour
         syn = new Synth(settings);
         try
         {
-            syn.LoadSoundFont("Assets/Resources/FluidR3_GM.sf2", true);
+            syn.LoadSoundFont("Assets/DLLs/FluidR3_GM.sf2", true);
         }
         catch (FileNotFoundException e)
         {
