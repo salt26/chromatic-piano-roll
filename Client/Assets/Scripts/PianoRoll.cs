@@ -1,21 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using System.IO;
 using UnityEngine;
 using Newtonsoft.Json.Linq;
-using System;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
+using TMPro;
 
 public class PianoRoll : MonoBehaviour
 {
     public static PianoRoll pr;
 
-    public TextAsset notesJson;
     public GameObject notePrefab;
     public GameObject notesParent;
     public int colorPaletteIndex;
     public Camera mainCamera;
     public RangeSlider rangeSlider;
+    public TMP_Dropdown musicDropdown;
+    public GameObject loadingPanel;
 
     [HideInInspector]
     public List<Note> notes = new();
@@ -48,6 +51,8 @@ public class PianoRoll : MonoBehaviour
     [HideInInspector]
     public float scrollOffset;
 
+    private Dictionary<string, JArray> jsonFiles;
+
     void Awake()
     {
         if (pr is not null && pr != this)
@@ -61,8 +66,64 @@ public class PianoRoll : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        loadingPanel.SetActive(true);
+        // TODO 파일 목록 표시
+        jsonFiles = new Dictionary<string, JArray>();
+        List<string> jsonNames = new List<string>();
+        DirectoryInfo di = new DirectoryInfo(Application.dataPath + "/Data/JSON");
+        foreach (FileInfo file in di.GetFiles())
+        {
+            if (file.Extension.Equals(".json"))
+            {
+                jsonFiles.Add(file.Name.Substring(0, file.Name.LastIndexOf('.')),
+                    JArray.Parse(File.ReadAllText(file.FullName)));
+                jsonNames.Add(file.Name.Substring(0, file.Name.LastIndexOf('.')));
+            }
+        }
+        musicDropdown.ClearOptions();
+        musicDropdown.AddOptions(jsonNames);
+        musicDropdown.value = 0;
+        Initialize();
+    }
+
+    void Update()
+    {
+        //float onset = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
+        //scrollValue = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
+        //float offset = (rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f;
+        //scrollValue = (((rangeSlider.MinRangeSize + rangeSlider.LowValue) / rangeSlider.MinRangeSize * 4f + 4.5f) + ((rangeSlider.HighValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f)) / 2f;
+        scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
+        mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
+    }
+
+    void Initialize()
+    {
+        loadingPanel.SetActive(true);
         EndTiming = 0;
-        JArray jArray = JArray.Parse(notesJson.text);
+        //JArray jArray = JArray.Parse(notesJson.text);
+        if (notes == null)
+        {
+            notes = new();
+        }
+        foreach (Note note in notes)
+        {
+            Destroy(note.gameObject);
+        }
+        notes.Clear();
+
+        if (musicDropdown.options.Count <= musicDropdown.value || musicDropdown.value < 0)
+        {
+            Debug.LogError("Music index is out of range!");
+            musicDropdown.value = 0;
+        }
+
+        bool b = jsonFiles.TryGetValue(musicDropdown.options[musicDropdown.value].text, out JArray jArray);
+        if (!b || jArray == null)
+        {
+            Debug.LogError("Cannot find the music file!");
+            return;
+        }
+
         foreach (JObject noteJson in jArray)
         {
             GameObject g = Instantiate(notePrefab, notesParent.transform);
@@ -78,16 +139,7 @@ public class PianoRoll : MonoBehaviour
         scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
         mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
         UpdateXScale();
-    }
-
-    void Update()
-    {
-        //float onset = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
-        //scrollValue = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
-        //float offset = (rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f;
-        //scrollValue = (((rangeSlider.MinRangeSize + rangeSlider.LowValue) / rangeSlider.MinRangeSize * 4f + 4.5f) + ((rangeSlider.HighValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f)) / 2f;
-        //scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
-        //mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
+        loadingPanel.SetActive(false);
     }
 
     public void UpdateXScale()
@@ -97,7 +149,7 @@ public class PianoRoll : MonoBehaviour
         scrollOffset = Mathf.Lerp(MIN_OFFSET, MAX_OFFSET, Mathf.Pow(Mathf.Clamp01(rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize), 0.5f));
         float oldXScale = XScale;
         XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / (scrollOffset * 2f)), scaleValue);
-        if (!Approximately(oldXScale, XScale))
+        if (!Mathf.Approximately(oldXScale, XScale))
         {
             print("UpdateAllNotes");
             UpdateAllNotes();
@@ -144,6 +196,11 @@ public class PianoRoll : MonoBehaviour
         this.scrollValue = (lowValue + highValue) / 2f;
         this.scaleValue = highValue - lowValue;
         rangeSlider.OnValueChanged.Invoke(lowValue, highValue);
+    }
+
+    public void ChangeMusic()
+    {
+        Initialize();
     }
 
     private static bool Approximately(float a, float b)
