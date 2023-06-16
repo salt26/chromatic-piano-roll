@@ -86,8 +86,8 @@ public class PianoRoll : MonoBehaviour
         //scrollValue = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
         //float offset = (rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f;
         //scrollValue = (((rangeSlider.MinRangeSize + rangeSlider.LowValue) / rangeSlider.MinRangeSize * 4f + 4.5f) + ((rangeSlider.HighValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f)) / 2f;
-        scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
-        mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
+        //scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
+        //mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
     }
 
     public void UpdateXScale()
@@ -95,7 +95,17 @@ public class PianoRoll : MonoBehaviour
         print("UpdateXScale");
         scaleValue = rangeSlider.HighValue - rangeSlider.LowValue;
         scrollOffset = Mathf.Lerp(MIN_OFFSET, MAX_OFFSET, Mathf.Pow(Mathf.Clamp01(rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize), 0.5f));
+        float oldXScale = XScale;
         XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / (scrollOffset * 2f)), scaleValue);
+        if (!Approximately(oldXScale, XScale))
+        {
+            print("UpdateAllNotes");
+            UpdateAllNotes();
+        }
+    }
+
+    public void UpdateAllNotes()
+    {
         foreach (Note note in notes)
         {
             note.UpdateNote();
@@ -134,5 +144,10 @@ public class PianoRoll : MonoBehaviour
         this.scrollValue = (lowValue + highValue) / 2f;
         this.scaleValue = highValue - lowValue;
         rangeSlider.OnValueChanged.Invoke(lowValue, highValue);
+    }
+
+    private static bool Approximately(float a, float b)
+    {
+        return Mathf.Abs(b - a) < Mathf.Max(1E-12f * Mathf.Max(Mathf.Abs(a), Mathf.Abs(b)), Mathf.Epsilon * 8f);
     }
 }
