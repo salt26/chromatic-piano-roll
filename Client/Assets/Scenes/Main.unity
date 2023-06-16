@@ -105,7 +105,7 @@ NavMeshSettings:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_BuildSettings:
-    serializedVersion: 2
+    serializedVersion: 3
     agentTypeID: 0
     agentRadius: 0.5
     agentHeight: 2
@@ -118,7 +118,7 @@ NavMeshSettings:
     cellSize: 0.16666667
     manualTileSize: 0
     tileSize: 256
-    accuratePlacement: 0
+    buildHeightMesh: 0
     maxJobWorkers: 0
     preserveTilesOutsideBounds: 0
     debug:
@@ -154,6 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
   m_HorizontalAxis: Horizontal
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
@@ -689,6 +690,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1084,9 +1086,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -1481,6 +1491,7 @@ MonoBehaviour:
   m_LowValue: 0
   m_HighValue: 0
   m_MinRangeSize: 0
+  m_PointerUpOnly: 0
   m_IsBarMovable: 1
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2210,7 +2221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 294cee4fe79ec2142b6884d1377bf920, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  notesJson: {fileID: 4900000, guid: 46941124ce877854b8209ffdecb5ceee, type: 3}
+  notesJson: {fileID: 4900000, guid: 775f4ab9f3f93dd4cb0660eb15279b4d, type: 3}
   notePrefab: {fileID: 3896810369488186565, guid: 0a046ee6ef47ecd4e832a264c713ae58,
     type: 3}
   notesParent: {fileID: 992873061}
@@ -2218,8 +2229,10 @@ MonoBehaviour:
   mainCamera: {fileID: 519420031}
   rangeSlider: {fileID: 920983982}
   notes: []
+  _xScale: 500000
   scaleValue: 0
   scrollValue: 0
+  scrollOffset: 0
 --- !u!114 &1528920798
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2280,6 +2293,31 @@ MonoBehaviour:
     - _key: 3
       _value: {r: 0.46666667, g: 0.65882355, b: 0.8509804, a: 1}
     - _key: 10
+      _value: {r: 0.46666667, g: 0.8509804, b: 0.8509804, a: 1}
+    - _key: 5
+      _value: {r: 0.46666667, g: 0.8509804, b: 0.65882355, a: 1}
+  - _pairs:
+    - _key: 4
+      _value: {r: 0.46666667, g: 0.8509804, b: 0.46666667, a: 1}
+    - _key: 3
+      _value: {r: 0.65882355, g: 0.8509804, b: 0.46666667, a: 1}
+    - _key: 2
+      _value: {r: 0.8509804, g: 0.8509804, b: 0.46666667, a: 1}
+    - _key: 1
+      _value: {r: 0.8509804, g: 0.65882355, b: 0.46666667, a: 1}
+    - _key: 0
+      _value: {r: 0.8509804, g: 0.46666667, b: 0.46666667, a: 1}
+    - _key: 11
+      _value: {r: 0.8509804, g: 0.46666667, b: 0.65882355, a: 1}
+    - _key: 10
+      _value: {r: 0.8509804, g: 0.46666667, b: 0.8509804, a: 1}
+    - _key: 9
+      _value: {r: 0.65882355, g: 0.46666667, b: 0.8509804, a: 1}
+    - _key: 8
+      _value: {r: 0.46666667, g: 0.46666667, b: 0.8509804, a: 1}
+    - _key: 7
+      _value: {r: 0.46666667, g: 0.65882355, b: 0.8509804, a: 1}
+    - _key: 6
       _value: {r: 0.46666667, g: 0.8509804, b: 0.8509804, a: 1}
     - _key: 5
       _value: {r: 0.46666667, g: 0.8509804, b: 0.65882355, a: 1}
