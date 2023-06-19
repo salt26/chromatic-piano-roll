@@ -19,11 +19,14 @@ public class PianoRoll : MonoBehaviour
     public Camera mainCamera;
     public RangeSlider rangeSlider;
     public TMP_Dropdown musicDropdown;
+    public TMP_Dropdown colorDropdown;
     public GameObject loadingPanel;
     public List<TextAsset> jsonData = new();
 
     [HideInInspector]
     public List<Note> notes = new();
+
+    public bool IsReady { get; private set; }
 
     public long EndTiming { get; private set; }
 
@@ -60,6 +63,7 @@ public class PianoRoll : MonoBehaviour
 
     void Awake()
     {
+        IsReady = false;
         if (pr is not null && pr != this)
         {
             Destroy(gameObject);
@@ -110,6 +114,7 @@ public class PianoRoll : MonoBehaviour
 
     void Initialize()
     {
+        IsReady = false;
         loadingPanel.SetActive(true);
         GetComponent<PlayMusic>().Stop();
         EndTiming = 0;
@@ -155,18 +160,17 @@ public class PianoRoll : MonoBehaviour
         UpdateXScale();
         mainCamera.transform.localPosition = new Vector3(EndTiming / initialXScale * scrollValue, 0f, -10f);
         loadingPanel.SetActive(false);
+        IsReady = true;
     }
 
     public void UpdateXScale()
     {
-        //print("UpdateXScale");
         scaleValue = rangeSlider.HighValue - rangeSlider.LowValue;
         scrollOffset = Mathf.Lerp(MIN_OFFSET, MAX_OFFSET, Mathf.Pow(Mathf.Clamp01(rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize), 0.5f));
         float oldXScale = XScale;
         XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / (scrollOffset * 2f)), scaleValue);
         if (!Mathf.Approximately(oldXScale, XScale))
         {
-            //print("UpdateAllNotes");
             UpdateAllNotes();
         }
     }
@@ -177,6 +181,13 @@ public class PianoRoll : MonoBehaviour
         {
             note.UpdateNote();
         }
+    }
+
+    public void UpdateColor()
+    {
+        if (!IsReady) return;
+        colorPaletteIndex = colorDropdown.value;
+        UpdateAllNotes();
     }
 
     public void UpdateRangeSliderValues(float lowValue, float highValue, float scaleValue)
