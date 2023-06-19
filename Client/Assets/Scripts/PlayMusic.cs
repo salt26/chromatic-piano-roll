@@ -37,7 +37,17 @@ public class PlayMusic : MonoBehaviour
         }
     }
 
-    private bool IsPlaying { get; set; }
+    private bool _isPlaying;
+    public bool IsPlaying {
+        get
+        {
+            return HasStart && _isPlaying && playbackPosition <= PianoRoll.pr.EndTiming;
+        }
+        private set
+        {
+            _isPlaying = value;
+        }
+    }
 
     private bool _hasCameraLocked;
     public bool HasCameraLocked {
@@ -76,7 +86,7 @@ public class PlayMusic : MonoBehaviour
         syn = new Synth(settings);
         try
         {
-            syn.LoadSoundFont("Assets/DLLs/FluidR3_GM.sf2", true);
+            syn.LoadSoundFont("FluidR3_GM.sf2", true);
         }
         catch (FileNotFoundException e)
         {
@@ -112,7 +122,7 @@ public class PlayMusic : MonoBehaviour
 
         long oldPosition = playbackPosition;
 
-        if (IsPlaying && playbackPosition <= PianoRoll.pr.EndTiming)
+        if (IsPlaying)
         {
             playbackPosition += (long)(Time.deltaTime * 1000000f);
             playButton.gameObject.SetActive(false);
@@ -120,6 +130,7 @@ public class PlayMusic : MonoBehaviour
             pauseButton.interactable = true;
             pauseButton.gameObject.SetActive(true);
             PianoRoll.pr.rangeSlider.PointerUpOnly = false;
+            PianoRoll.pr.musicDropdown.interactable = false;
         }
         else
         {
@@ -128,6 +139,7 @@ public class PlayMusic : MonoBehaviour
             playButton.interactable = true;
             playButton.gameObject.SetActive(true);
             PianoRoll.pr.rangeSlider.PointerUpOnly = true;
+            PianoRoll.pr.musicDropdown.interactable = true;
         }
         playbackBar.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale, 0f, 0f);
 
@@ -163,7 +175,7 @@ public class PlayMusic : MonoBehaviour
         }
         offsetBuffer.RemoveAll(x => x.endTiming < playbackPosition);
 
-        if (IsPlaying && playbackPosition <= PianoRoll.pr.EndTiming)
+        if (IsPlaying)
         {
             foreach (Note note in PianoRoll.pr.notes.Where(x => x.startTiming >= oldPosition && x.startTiming < playbackPosition))
             {

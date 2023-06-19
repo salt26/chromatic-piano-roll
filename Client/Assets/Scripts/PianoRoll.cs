@@ -19,6 +19,7 @@ public class PianoRoll : MonoBehaviour
     public RangeSlider rangeSlider;
     public TMP_Dropdown musicDropdown;
     public GameObject loadingPanel;
+    public List<TextAsset> jsonData = new();
 
     [HideInInspector]
     public List<Note> notes = new();
@@ -70,6 +71,7 @@ public class PianoRoll : MonoBehaviour
         // TODO 파일 목록 표시
         jsonFiles = new Dictionary<string, JArray>();
         List<string> jsonNames = new List<string>();
+        /*
         DirectoryInfo di = new DirectoryInfo(Application.dataPath + "/Data/JSON");
         foreach (FileInfo file in di.GetFiles())
         {
@@ -79,6 +81,12 @@ public class PianoRoll : MonoBehaviour
                     JArray.Parse(File.ReadAllText(file.FullName)));
                 jsonNames.Add(file.Name.Substring(0, file.Name.LastIndexOf('.')));
             }
+        }
+        */
+        foreach (TextAsset ta in jsonData)
+        {
+            jsonFiles.Add(ta.name, JArray.Parse(ta.text));
+            jsonNames.Add(ta.name);
         }
         musicDropdown.ClearOptions();
         musicDropdown.AddOptions(jsonNames);
@@ -144,14 +152,14 @@ public class PianoRoll : MonoBehaviour
 
     public void UpdateXScale()
     {
-        print("UpdateXScale");
+        //print("UpdateXScale");
         scaleValue = rangeSlider.HighValue - rangeSlider.LowValue;
         scrollOffset = Mathf.Lerp(MIN_OFFSET, MAX_OFFSET, Mathf.Pow(Mathf.Clamp01(rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize), 0.5f));
         float oldXScale = XScale;
         XScale = Mathf.Lerp(100000f, Math.Max(500000f, EndTiming / (scrollOffset * 2f)), scaleValue);
         if (!Mathf.Approximately(oldXScale, XScale))
         {
-            print("UpdateAllNotes");
+            //print("UpdateAllNotes");
             UpdateAllNotes();
         }
     }
@@ -200,6 +208,7 @@ public class PianoRoll : MonoBehaviour
 
     public void ChangeMusic()
     {
+        if (GetComponent<PlayMusic>().IsPlaying) return;
         Initialize();
     }
 
