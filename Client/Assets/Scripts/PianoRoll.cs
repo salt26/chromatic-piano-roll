@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 using TMPro;
+using UnityEngine.UIElements;
 
 public class PianoRoll : MonoBehaviour
 {
@@ -41,6 +42,9 @@ public class PianoRoll : MonoBehaviour
             else _xScale = value;
         }
     }
+
+    [SerializeField]
+    private float initialXScale = 500000f;
 
     public const float MAX_OFFSET = 8.5f;
     public const float MIN_OFFSET = 4.5f;
@@ -107,6 +111,7 @@ public class PianoRoll : MonoBehaviour
     void Initialize()
     {
         loadingPanel.SetActive(true);
+        GetComponent<PlayMusic>().Stop();
         EndTiming = 0;
         //JArray jArray = JArray.Parse(notesJson.text);
         if (notes == null)
@@ -140,13 +145,15 @@ public class PianoRoll : MonoBehaviour
             notes.Add(note);
             EndTiming = Math.Max(EndTiming, note.endTiming);
         }
-        rangeSlider.MinRangeSize = Mathf.Clamp01((XScale - 100000f) / Math.Max(400000f, EndTiming / (MIN_OFFSET * 2f) - 100000f));
-        scaleValue = rangeSlider.MinRangeSize;
+        rangeSlider.MinRangeSize = Mathf.Clamp01((initialXScale - 100000f) / Math.Max(400000f, EndTiming / (MIN_OFFSET * 2f) - 100000f));
+        scaleValue = 1f;
+        //scaleValue = rangeSlider.MinRangeSize;
         rangeSlider.LowValue = 0;
-        rangeSlider.HighValue = scaleValue;
+        //rangeSlider.HighValue = scaleValue;
+        rangeSlider.HighValue = 1;
         scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
-        mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
         UpdateXScale();
+        mainCamera.transform.localPosition = new Vector3(EndTiming / initialXScale * scrollValue, 0f, -10f);
         loadingPanel.SetActive(false);
     }
 
