@@ -76,19 +76,20 @@ public class FileManager : MonoBehaviour
 
 		// Dialog is closed
 		// Print whether the user has selected some files/folders or cancelled the operation (FileBrowser.Success)
-		Debug.Log(FileBrowser.Success);
+		//Debug.Log(FileBrowser.Success);
 
 		if (FileBrowser.Success)
 		{
 			// Print paths of the selected files (FileBrowser.Result) (null, if FileBrowser.Success is false)
+			/*
 			for (int i = 0; i < FileBrowser.Result.Length; i++)
 				Debug.Log(FileBrowser.Result[i]);
+			*/
 
 			// Read the bytes of the first file via FileBrowserHelpers
 			// Contrary to File.ReadAllBytes, this function works on Android 10+, as well
-			List<byte[]> bytes = new();
 			MultipartFormDataContent multipartFormDataContent = new MultipartFormDataContent();
-			for (int i = 0; i < FileBrowser.Result.Length; i++)
+			for (int i = 0; i < 1 /*FileBrowser.Result.Length*/; i++)
 			{
 				/*
 				var fileContent = new StreamContent(File.OpenRead(FileBrowser.Result[i]))
@@ -119,7 +120,7 @@ public class FileManager : MonoBehaviour
                 };
 				multipartFormDataContent.Add(byteArrayContent, "file", Path.GetFileName(FileBrowser.Result[i]));
 				Task t = PreprocessMidi(client, multipartFormDataContent);
-				t.ContinueWith(_ => { Debug.Log("Task completed!"); });
+				t.ContinueWith(_ => { /*Debug.Log("Task completed!");*/ });
 			}
 		}
 	}
@@ -131,12 +132,16 @@ public class FileManager : MonoBehaviour
 			using (HttpResponseMessage response = await httpClient.PostAsync(url, httpContent))
 			{
 				string body = await response.Content.ReadAsStringAsync();
-				Debug.Log(response.StatusCode);
 
 				if (response.StatusCode == HttpStatusCode.OK)
                 {
 					PianoRoll.pr.InitializeWithCustomMidi(body);
                 }
+				else
+                {
+					Debug.Log(response.StatusCode);
+					Debug.Log(body);
+				}
             }
         }
 		catch (HttpRequestException e1)

@@ -11,9 +11,6 @@ async def root():
 
 @app.post("/upload/")
 async def upload_midi(request: Request, file: UploadFile):
-    print(request)
-    print(file.headers)
-    print(file.content_type)
     if file.content_type not in ["audio/mid", "audio/midi", "audio/x-midi"]:
         return {"error": "The file is not a midi file."}
     midi = MidiFile(file=file.file)
