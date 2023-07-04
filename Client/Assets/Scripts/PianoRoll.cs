@@ -95,6 +95,7 @@ public class PianoRoll : MonoBehaviour
         {
             jsonFiles.Add(ta.name, JArray.Parse(ta.text));
             jsonNames.Add(ta.name);
+            break;
         }
         musicDropdown.ClearOptions();
         musicDropdown.AddOptions(jsonNames);
@@ -141,6 +142,61 @@ public class PianoRoll : MonoBehaviour
             Debug.LogError("Cannot find the music file!");
             return;
         }
+
+        foreach (JObject noteJson in jArray)
+        {
+            GameObject g = Instantiate(notePrefab, notesParent.transform);
+            Note note = g.GetComponent<Note>();
+            note.Initialize(noteJson);
+            notes.Add(note);
+            EndTiming = Math.Max(EndTiming, note.endTiming);
+        }
+        rangeSlider.MinRangeSize = Mathf.Clamp01((initialXScale - 100000f) / Math.Max(400000f, EndTiming / (MIN_OFFSET * 2f) - 100000f));
+        scaleValue = 1f;
+        //scaleValue = rangeSlider.MinRangeSize;
+        rangeSlider.LowValue = 0;
+        //rangeSlider.HighValue = scaleValue;
+        rangeSlider.HighValue = 1;
+        scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
+        UpdateXScale();
+        mainCamera.transform.localPosition = new Vector3(EndTiming / initialXScale * scrollValue, 0f, -10f);
+        loadingPanel.SetActive(false);
+        IsReady = true;
+    }
+
+    public void InitializeWithCustomMidi(string preprocessedMidi)
+    {
+        IsReady = false;
+        loadingPanel.SetActive(true);
+        GetComponent<PlayMusic>().Stop();
+        EndTiming = 0;
+        //JArray jArray = JArray.Parse(notesJson.text);
+        if (notes == null)
+        {
+            notes = new();
+        }
+        foreach (Note note in notes)
+        {
+            Destroy(note.gameObject);
+        }
+        notes.Clear();
+
+        /*
+        if (musicDropdown.options.Count <= musicDropdown.value || musicDropdown.value < 0)
+        {
+            Debug.LogError("Music index is out of range!");
+            musicDropdown.value = 0;
+        }
+
+        bool b = jsonFiles.TryGetValue(musicDropdown.options[musicDropdown.value].text, out JArray jArray);
+        if (!b || jArray == null)
+        {
+            Debug.LogError("Cannot find the music file!");
+            return;
+        }
+        */
+
+        JArray jArray = JArray.Parse(preprocessedMidi);
 
         foreach (JObject noteJson in jArray)
         {
