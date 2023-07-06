@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 using TMPro;
 using UnityEngine.UIElements;
+using System.Threading.Tasks;
 
 public class PianoRoll : MonoBehaviour
 {
@@ -26,7 +27,7 @@ public class PianoRoll : MonoBehaviour
     [HideInInspector]
     public List<Note> notes = new();
 
-    public bool IsReady { get; private set; }
+    public bool IsReady { get; set; }
 
     public long EndTiming { get; private set; }
 
@@ -93,18 +94,27 @@ public class PianoRoll : MonoBehaviour
         */
         foreach (TextAsset ta in jsonData)
         {
-            jsonFiles.Add(ta.name, JArray.Parse(ta.text));
+            //jsonFiles.Add(ta.name, JArray.Parse(ta.text));
             jsonNames.Add(ta.name);
-            break;
         }
         musicDropdown.ClearOptions();
         musicDropdown.AddOptions(jsonNames);
-        musicDropdown.value = 0;
-        Initialize();
+        musicDropdown.value = UnityEngine.Random.Range(0, musicDropdown.options.Count);
+
+        StartCoroutine(Initialize());
     }
 
     void Update()
     {
+        if (!IsReady && !loadingPanel.activeInHierarchy)
+        {
+            loadingPanel.SetActive(true);
+            return;
+        }
+        else if (IsReady && loadingPanel.activeInHierarchy)
+        {
+            loadingPanel.SetActive(false);
+        }
         //float onset = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
         //scrollValue = (rangeSlider.HighValue + rangeSlider.LowValue) / 2f;
         //float offset = (rangeSlider.HighValue - rangeSlider.LowValue - rangeSlider.MinRangeSize) / (1 - rangeSlider.MinRangeSize) * 4f + 4.5f;
@@ -113,10 +123,10 @@ public class PianoRoll : MonoBehaviour
         mainCamera.transform.localPosition = new Vector3(EndTiming / XScale * scrollValue, 0f, -10f);
     }
 
-    void Initialize()
+    IEnumerator Initialize()
     {
         IsReady = false;
-        loadingPanel.SetActive(true);
+        //loadingPanel.SetActive(true);
         GetComponent<PlayMusic>().Stop();
         EndTiming = 0;
         //JArray jArray = JArray.Parse(notesJson.text);
@@ -129,6 +139,7 @@ public class PianoRoll : MonoBehaviour
             Destroy(note.gameObject);
         }
         notes.Clear();
+        yield return null;
 
         if (musicDropdown.options.Count <= musicDropdown.value || musicDropdown.value < 0)
         {
@@ -139,8 +150,14 @@ public class PianoRoll : MonoBehaviour
         bool b = jsonFiles.TryGetValue(musicDropdown.options[musicDropdown.value].text, out JArray jArray);
         if (!b || jArray == null)
         {
-            Debug.LogError("Cannot find the music file!");
-            return;
+            TextAsset ta = jsonData.Find(e => e.name.Equals(musicDropdown.options[musicDropdown.value].text));
+            if (ta == null)
+            {
+                Debug.LogError("Cannot find the music file!");
+                yield break;
+            }
+            jArray = JArray.Parse(ta.text);
+            jsonFiles.Add(ta.name, jArray);
         }
 
         foreach (JObject noteJson in jArray)
@@ -159,15 +176,16 @@ public class PianoRoll : MonoBehaviour
         rangeSlider.HighValue = 1;
         scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
         UpdateXScale();
+
         mainCamera.transform.localPosition = new Vector3(EndTiming / initialXScale * scrollValue, 0f, -10f);
-        loadingPanel.SetActive(false);
+        //loadingPanel.SetActive(false);
         IsReady = true;
     }
 
-    public void InitializeWithCustomMidi(string preprocessedMidi)
+    public IEnumerator InitializeWithCustomMidi(string preprocessedMidi)
     {
         IsReady = false;
-        loadingPanel.SetActive(true);
+        //loadingPanel.SetActive(true);
         GetComponent<PlayMusic>().Stop();
         EndTiming = 0;
         //JArray jArray = JArray.Parse(notesJson.text);
@@ -180,6 +198,7 @@ public class PianoRoll : MonoBehaviour
             Destroy(note.gameObject);
         }
         notes.Clear();
+        yield return null;
 
         /*
         if (musicDropdown.options.Count <= musicDropdown.value || musicDropdown.value < 0)
@@ -215,7 +234,7 @@ public class PianoRoll : MonoBehaviour
         scrollValue = (rangeSlider.LowValue + rangeSlider.HighValue) / 2f;
         UpdateXScale();
         mainCamera.transform.localPosition = new Vector3(EndTiming / initialXScale * scrollValue, 0f, -10f);
-        loadingPanel.SetActive(false);
+        //loadingPanel.SetActive(false);
         IsReady = true;
     }
 
@@ -283,7 +302,7 @@ public class PianoRoll : MonoBehaviour
     public void ChangeMusic()
     {
         if (GetComponent<PlayMusic>().IsPlaying) return;
-        Initialize();
+        StartCoroutine(Initialize());
     }
 
     private static bool Approximately(float a, float b)

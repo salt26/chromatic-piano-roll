@@ -127,6 +127,7 @@ public class FileManager : MonoBehaviour
 
 	async Task PreprocessMidi(HttpClient httpClient, HttpContent httpContent)
     {
+		PianoRoll.pr.IsReady = false;
 		try
         {
 			using (HttpResponseMessage response = await httpClient.PostAsync(url, httpContent))
@@ -135,7 +136,7 @@ public class FileManager : MonoBehaviour
 
 				if (response.StatusCode == HttpStatusCode.OK)
                 {
-					PianoRoll.pr.InitializeWithCustomMidi(body);
+					StartCoroutine(PianoRoll.pr.InitializeWithCustomMidi(body));
                 }
 				else
                 {
@@ -151,6 +152,10 @@ public class FileManager : MonoBehaviour
 		catch (Exception e2)
         {
 			Debug.LogException(e2);
+        }
+		finally
+        {
+			PianoRoll.pr.IsReady = true;
         }
     }
 
