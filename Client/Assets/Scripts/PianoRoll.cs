@@ -9,6 +9,9 @@ using UnityEngine.UI.Extensions;
 using TMPro;
 using UnityEngine.UIElements;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 
 public class PianoRoll : MonoBehaviour
 {
@@ -61,6 +64,7 @@ public class PianoRoll : MonoBehaviour
     public float scrollOffset;
 
     public Dictionary<string, JArray> jsonFiles;
+    public Dictionary<string, string> jsonHashes;
 
     void Awake()
     {
@@ -79,6 +83,7 @@ public class PianoRoll : MonoBehaviour
         loadingPanel.SetActive(true);
         // TODO 파일 목록 표시
         jsonFiles = new Dictionary<string, JArray>();
+        jsonHashes = new Dictionary<string, string>();
         List<string> jsonNames = new List<string>();
         /*
         DirectoryInfo di = new DirectoryInfo(Application.dataPath + "/Data/JSON");
@@ -96,6 +101,7 @@ public class PianoRoll : MonoBehaviour
         {
             //jsonFiles.Add(ta.name, JArray.Parse(ta.text));
             jsonNames.Add(ta.name);
+            jsonHashes.Add(ta.name, Hash(ta.text));
         }
         musicDropdown.ClearOptions();
         musicDropdown.AddOptions(jsonNames);
@@ -147,17 +153,27 @@ public class PianoRoll : MonoBehaviour
             musicDropdown.value = 0;
         }
 
-        bool b = jsonFiles.TryGetValue(musicDropdown.options[musicDropdown.value].text, out JArray jArray);
-        if (!b || jArray == null)
+        JArray jArray;
+        bool b1 = jsonHashes.TryGetValue(musicDropdown.options[musicDropdown.value].text, out string hash);
+        if (!b1 || hash == null || hash.Equals(""))
         {
-            TextAsset ta = jsonData.Find(e => e.name.Equals(musicDropdown.options[musicDropdown.value].text));
-            if (ta == null)
+            Debug.LogError("Cannot find the hash of the music file!");
+            yield break;
+        }
+        else
+        {
+            bool b2 = jsonFiles.TryGetValue(ConcatenateFilenameAndHash(musicDropdown.options[musicDropdown.value].text, hash), out jArray);
+            if (!b2 || jArray == null)
             {
-                Debug.LogError("Cannot find the music file!");
-                yield break;
+                TextAsset ta = jsonData.Find(e => e.name.Equals(musicDropdown.options[musicDropdown.value].text));
+                if (ta == null)
+                {
+                    Debug.LogError("Cannot find the music file!");
+                    yield break;
+                }
+                jArray = JArray.Parse(ta.text);
+                jsonFiles.Add(ConcatenateFilenameAndHash(ta.name, hash), jArray);
             }
-            jArray = JArray.Parse(ta.text);
-            jsonFiles.Add(ta.name, jArray);
         }
 
         foreach (JObject noteJson in jArray)
@@ -182,7 +198,7 @@ public class PianoRoll : MonoBehaviour
         IsReady = true;
     }
 
-    public IEnumerator InitializeWithCustomMidi(string preprocessedMidi, string filename)
+    public IEnumerator InitializeWithCustomMidi(string preprocessedMidi, string filenameWithoutExtension)
     {
         IsReady = false;
         //loadingPanel.SetActive(true);
@@ -215,11 +231,43 @@ public class PianoRoll : MonoBehaviour
         }
         */
 
+        string hash = Hash(preprocessedMidi);
         JArray jArray = JArray.Parse(preprocessedMidi);
 
-        jsonFiles.Add(filename, jArray);
-        musicDropdown.AddOptions(new List<string>() { filename });
-        musicDropdown.value = musicDropdown.options.Count - 1;
+
+
+        string tempFilename = filenameWithoutExtension;
+        while (true)
+        {
+            if (jsonHashes.TryGetValue(tempFilename, out string hash2))
+            {
+                if (hash.Equals(hash2))
+                {
+                    int v = musicDropdown.options.FindIndex(e => tempFilename.Equals(e.text));
+                    if (v != -1)
+                    {
+                        musicDropdown.value = v;
+                        break;
+                    }
+                    Debug.LogError("Unexpected situation about jsonHashes");
+                    break;
+                }
+                else
+                {
+                    tempFilename = NextFilename(tempFilename);
+                    Debug.Log(tempFilename);
+                    // continue;
+                }
+            }
+            else
+            {
+                jsonHashes.Add(tempFilename, hash);
+                jsonFiles.Add(ConcatenateFilenameAndHash(tempFilename, hash), jArray);
+                musicDropdown.AddOptions(new List<string>() { tempFilename });
+                musicDropdown.value = musicDropdown.options.Count - 1;
+                break;
+            }
+        }
 
         foreach (JObject noteJson in jArray)
         {
@@ -312,5 +360,43 @@ public class PianoRoll : MonoBehaviour
     private static bool Approximately(float a, float b)
     {
         return Mathf.Abs(b - a) < Mathf.Max(1E-12f * Mathf.Max(Mathf.Abs(a), Mathf.Abs(b)), Mathf.Epsilon * 8f);
+    }
+
+    private string Hash(string original)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(original));
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("x2"));
+            }
+            return builder.ToString();
+        }
+    }
+
+    private string NextFilename(string filenameWithoutExtension)
+    {
+        Regex regex = new Regex(@" \(\d+\)\z");
+        if (regex.IsMatch(filenameWithoutExtension))
+        {
+            int startIndex = filenameWithoutExtension.LastIndexOf('(') + 1;
+            int endIndex = filenameWithoutExtension.LastIndexOf(')');
+            if (int.TryParse(filenameWithoutExtension.Substring(startIndex, endIndex - startIndex), out int count))
+            {
+                if (count > 0)
+                {
+                    return filenameWithoutExtension.Substring(0, startIndex) + (count + 1) + ")";
+                }
+            }
+        }
+        return filenameWithoutExtension + " (1)";
+    }
+
+    private string ConcatenateFilenameAndHash(string filename, string hash)
+    {
+        return filename + "|" + hash;
     }
 }

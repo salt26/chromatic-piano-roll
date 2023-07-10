@@ -110,14 +110,6 @@ public class FileManager : MonoBehaviour
 				t.ContinueWith(_ => { Debug.Log("Task completed!"); });
 				*/
 
-				int v = PianoRoll.pr.musicDropdown.options.FindIndex(e => Path.GetFileNameWithoutExtension(FileBrowser.Result[i]).Equals(e.text));
-				if (v != -1)
-                {
-					PianoRoll.pr.musicDropdown.value = v;
-					PianoRoll.pr.ChangeMusic();
-					yield break;
-                }
-
 				byte[] b = FileBrowserHelpers.ReadBytesFromFile(FileBrowser.Result[i]);
 				ByteArrayContent byteArrayContent = new ByteArrayContent(b)
 				{
@@ -133,7 +125,7 @@ public class FileManager : MonoBehaviour
 		}
 	}
 
-	async Task PreprocessMidi(HttpClient httpClient, HttpContent httpContent, string filename)
+	async Task PreprocessMidi(HttpClient httpClient, HttpContent httpContent, string filenameWithoutExtension)
     {
 		PianoRoll.pr.IsReady = false;
 		try
@@ -144,7 +136,7 @@ public class FileManager : MonoBehaviour
 
 				if (response.StatusCode == HttpStatusCode.OK)
                 {
-					StartCoroutine(PianoRoll.pr.InitializeWithCustomMidi(body, filename));
+					StartCoroutine(PianoRoll.pr.InitializeWithCustomMidi(body, filenameWithoutExtension));
                 }
 				else
                 {
