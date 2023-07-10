@@ -60,7 +60,7 @@ public class PianoRoll : MonoBehaviour
     [HideInInspector]
     public float scrollOffset;
 
-    private Dictionary<string, JArray> jsonFiles;
+    public Dictionary<string, JArray> jsonFiles;
 
     void Awake()
     {
@@ -182,7 +182,7 @@ public class PianoRoll : MonoBehaviour
         IsReady = true;
     }
 
-    public IEnumerator InitializeWithCustomMidi(string preprocessedMidi)
+    public IEnumerator InitializeWithCustomMidi(string preprocessedMidi, string filename)
     {
         IsReady = false;
         //loadingPanel.SetActive(true);
@@ -216,6 +216,10 @@ public class PianoRoll : MonoBehaviour
         */
 
         JArray jArray = JArray.Parse(preprocessedMidi);
+
+        jsonFiles.Add(filename, jArray);
+        musicDropdown.AddOptions(new List<string>() { filename });
+        musicDropdown.value = musicDropdown.options.Count - 1;
 
         foreach (JObject noteJson in jArray)
         {

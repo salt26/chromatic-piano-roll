@@ -72,7 +72,7 @@ public class FileManager : MonoBehaviour
 		// Load file/folder: both, Allow multiple selection: true
 		// Initial path: default (Documents), Initial filename: empty
 		// Title: "Load File", Submit button text: "Load"
-		yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.FilesAndFolders, true, null, null, "Load Files and Folders", "Load");
+		yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.FilesAndFolders, false, null, null, "Load MIDI Files", "Load");
 
 		// Dialog is closed
 		// Print whether the user has selected some files/folders or cancelled the operation (FileBrowser.Success)
@@ -110,6 +110,14 @@ public class FileManager : MonoBehaviour
 				t.ContinueWith(_ => { Debug.Log("Task completed!"); });
 				*/
 
+				int v = PianoRoll.pr.musicDropdown.options.FindIndex(e => Path.GetFileNameWithoutExtension(FileBrowser.Result[i]).Equals(e.text));
+				if (v != -1)
+                {
+					PianoRoll.pr.musicDropdown.value = v;
+					PianoRoll.pr.ChangeMusic();
+					yield break;
+                }
+
 				byte[] b = FileBrowserHelpers.ReadBytesFromFile(FileBrowser.Result[i]);
 				ByteArrayContent byteArrayContent = new ByteArrayContent(b)
 				{
@@ -119,13 +127,13 @@ public class FileManager : MonoBehaviour
                     }
                 };
 				multipartFormDataContent.Add(byteArrayContent, "file", Path.GetFileName(FileBrowser.Result[i]));
-				Task t = PreprocessMidi(client, multipartFormDataContent);
+				Task t = PreprocessMidi(client, multipartFormDataContent, Path.GetFileNameWithoutExtension(FileBrowser.Result[i]));
 				t.ContinueWith(_ => { /*Debug.Log("Task completed!");*/ });
 			}
 		}
 	}
 
-	async Task PreprocessMidi(HttpClient httpClient, HttpContent httpContent)
+	async Task PreprocessMidi(HttpClient httpClient, HttpContent httpContent, string filename)
     {
 		PianoRoll.pr.IsReady = false;
 		try
@@ -136,7 +144,7 @@ public class FileManager : MonoBehaviour
 
 				if (response.StatusCode == HttpStatusCode.OK)
                 {
-					StartCoroutine(PianoRoll.pr.InitializeWithCustomMidi(body));
+					StartCoroutine(PianoRoll.pr.InitializeWithCustomMidi(body, filename));
                 }
 				else
                 {
