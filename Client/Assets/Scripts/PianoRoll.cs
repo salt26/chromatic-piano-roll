@@ -7,7 +7,6 @@ using Newtonsoft.Json.Linq;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 using TMPro;
-using UnityEngine.UIElements;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Text;
@@ -24,6 +23,7 @@ public class PianoRoll : MonoBehaviour
     public RangeSlider rangeSlider;
     public TMP_Dropdown musicDropdown;
     public TMP_Dropdown colorDropdown;
+    public Button loadButton;
     public GameObject loadingPanel;
     public List<TextAsset> jsonData = new();
 

@@ -131,6 +131,7 @@ public class PlayMusic : MonoBehaviour
             pauseButton.gameObject.SetActive(true);
             PianoRoll.pr.rangeSlider.PointerUpOnly = false;
             PianoRoll.pr.musicDropdown.interactable = false;
+            PianoRoll.pr.loadButton.interactable = false;
         }
         else
         {
@@ -140,6 +141,7 @@ public class PlayMusic : MonoBehaviour
             playButton.gameObject.SetActive(true);
             PianoRoll.pr.rangeSlider.PointerUpOnly = true;
             PianoRoll.pr.musicDropdown.interactable = true;
+            PianoRoll.pr.loadButton.interactable = true;
         }
         playbackBar.transform.localPosition = new Vector3(playbackPosition / PianoRoll.pr.XScale, 0f, 0f);
 
