@@ -18,7 +18,7 @@ Chromatic Piano Roll is a tool that visualizes music using the piano roll repres
     (Server) > pip install -r requirements.txt
     (Server) > uvicorn main:app --reload
     ```
-3. Download `Chromatic Piano Roll v0.2.zip` [(click here!)](https://github.com/salt26/chromatic-piano-roll/releases/tag/v0.2), unzip it, and execute `Chromatic Piano Roll.exe`.
+3. Download `Chromatic.Piano.Roll.v0.2.zip` [(click here!)](https://github.com/salt26/chromatic-piano-roll/releases/tag/v0.2), unzip it, and execute `Chromatic Piano Roll.exe`.
 4. Select the music from the dropdown menu in the top right corner, or load your custom MIDI file from your computer.
 5. Play the music from the button in the top left corner.
 6. You can adjust the range of the slider at the bottom to zoom in on the visualization.
