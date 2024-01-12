@@ -3,6 +3,8 @@
 음악을 피아노 롤 표현법으로 시각화하고 여기에 적절한 색을 입혀 음악 분석을 돕는 도구입니다.  
 Chromatic Piano Roll is a tool that visualizes music using the piano roll representation and applies appropriate colors to assist in music analysis.
 
+![Screenshot1](./Figures/Screenshot1.png)
+
 ### How To Use
 > Currently, it is supported only on Windows.
 
@@ -35,5 +37,3 @@ Chromatic Piano Roll is a tool that visualizes music using the piano roll repres
 * Play, pause or stop the music. Currently playing notes are highlighted with black border.
 * Zoom and pan the screen by adjusting the range of the slider at the bottom.
 * Fix the camera in the playback position. (Lock Camera)
-
-![Screenshot1](./Figures/Screenshot1.png)
