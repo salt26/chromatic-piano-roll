@@ -23,4 +23,17 @@ Chromatic Piano Roll is a tool that visualizes music using the piano roll repres
 5. Play the music from the button in the top left corner.
 6. You can adjust the range of the slider at the bottom to zoom in on the visualization.
 
+### Available Features
+#### v0.2
+* Select the music from the dropdown list.
+* Load a custom MIDI file from the local computer.
+  * The loaded music will be added to the list of selectable music options.
+* Change the color scheme for 12 pitch classes.
+  * Circle of 5th
+  * Black
+  * Rainbow
+* Play, pause or stop the music. Currently playing notes are highlighted with black border.
+* Zoom and pan the screen by adjusting the range of the slider at the bottom.
+* Fix the camera in the playback position. (Lock Camera)
+
 ![Screenshot1](./Figures/Screenshot1.png)
